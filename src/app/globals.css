@@ -1,0 +1,143 @@
+/* --- Core Design Tokens --- */
+:root {
+    --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --transition-speed: 0.3s;
+    --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark Theme (Default) */
+body.dark-theme {
+    --bg-primary: #050508;
+    --bg-secondary: #0a0a0f;
+    --accent-blue: #0a84ff;
+    --accent-purple: #bf5af2;
+    --accent-blue-rgb: 10, 132, 255;
+    --accent-purple-rgb: 191, 90, 242;
+    
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    
+    --card-bg: rgba(13, 14, 21, 0.7);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    
+    --header-bg: rgba(5, 5, 8, 0.75);
+    --header-border: rgba(255, 255, 255, 0.06);
+    
+    --divider: rgba(255, 255, 255, 0.08);
+    --hover-bg: rgba(255, 255, 255, 0.05);
+    
+    --callout-bg: rgba(191, 90, 242, 0.06);
+    --callout-border: rgba(191, 90, 242, 0.2);
+    --glow-opacity: 0.12;
+
+    /* Grid pattern */
+    --grid-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Light Theme */
+body.light-theme {
+    --bg-primary: #f8f9fc;
+    --bg-secondary: #ffffff;
+    --accent-blue: #007aff;
+    --accent-purple: #af52de;
+    --accent-blue-rgb: 0, 122, 255;
+    --accent-purple-rgb: 175, 82, 222;
+    
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+    
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(0, 0, 0, 0.06);
+    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+    
+    --header-bg: rgba(248, 249, 252, 0.75);
+    --header-border: rgba(0, 0, 0, 0.05);
+    
+    --divider: rgba(0, 0, 0, 0.06);
+    --hover-bg: rgba(0, 0, 0, 0.02);
+    
+    --callout-bg: rgba(175, 82, 222, 0.04);
+    --callout-border: rgba(175, 82, 222, 0.15);
+    --glow-opacity: 0.06;
+
+    /* Grid pattern */
+    --grid-color: rgba(0, 0, 0, 0.015);
+}
+
+/* --- Resets --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+body {
+    background-color: var(--bg-primary);
+    background-image: radial-gradient(var(--grid-color) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: background-color var(--transition-speed) var(--transition-timing), 
+                color var(--transition-speed) var(--transition-timing),
+                background-image var(--transition-speed) var(--transition-timing);
+}
+
+/* --- Decorative Background Glow grid --- */
+.glow-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.glow-sphere {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: var(--glow-opacity);
+    transition: opacity var(--transition-speed) var(--transition-timing);
+}
+
+.sphere-1 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--accent-blue) 0%, rgba(var(--accent-blue-rgb), 0) 70%);
+    top: -100px;
+    right: -50px;
+    animation: float-slow 25s infinite alternate;
+}
+
+.sphere-2 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--accent-purple) 0%, rgba(var(--accent-purple-rgb), 0) 70%);
+    bottom: -150px;
+    left: -100px;
+    animation: float-slow 30s infinite alternate-reverse;
+}
+
+@keyframes float-slow {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, 30px) scale(1.1); }
+    100% { transform: translate(-20px, -40px) scale(0.9); }
+}
