@@ -719,7 +719,7 @@ export default function Home() {
             style={{ display: "flex", justifyContent: "center", gap: "20px" }}
           >
             <a
-              href="https://play.google.com/apps/internaltest/4701153476101937430"
+              href="https://play.google.com/store/apps/details?id=com.adkdinesh.echospend"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.btnDownload}
