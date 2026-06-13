@@ -19,14 +19,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Echo Spend | 100% Private, On-Device Budget Tracker & AI SMS Parser",
   description:
-    "Secure your financial privacy with Echo Spend. Track expenses, budgets, subscriptions, and EMIs offline using a local on-device Llama AI. Zero ads, zero tracking, and sandboxed Google Drive sync.",
+    "Secure your financial privacy with Echo Spend. Track expenses, budgets, subscriptions, and EMIs offline using Echo AI. Zero ads, zero tracking, and sandboxed Google Drive sync.",
   keywords: [
     "personal finance app",
     "privacy budget tracker",
     "local AI expense manager",
     "offline finance",
     "sandboxed Google Drive backup",
-    "Llama AI",
+    "Echo AI",
     "SMS parse budget",
   ],
   authors: [{ name: "Echo Spend Developer" }],
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Echo Spend | 100% Private, On-Device Budget Tracker",
     description:
-      "Track budgets and transaction alerts offline with local Llama AI. Zero tracking, zero servers.",
+      "Track budgets and transaction alerts offline with Echo AI. Zero tracking, zero servers.",
     url: "https://echospend.adkdev.in",
     siteName: "Echo Spend",
     type: "website",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Echo Spend | 100% Private Budget Tracker",
     description:
-      "Budget tracking with local on-device AI. Complete privacy control over your money.",
+      "Budget tracking with offline Echo AI. Complete privacy control over your money.",
   },
   icons: {
     icon: "/logos/icon.png",

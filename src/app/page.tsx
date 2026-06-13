@@ -15,10 +15,10 @@ const tourTabs = [
     highlight: "Fully Offline SQLite database sandbox",
   },
   {
-    title: "Local Llama AI Insights",
+    title: "Local Echo AI Insights",
     subtitle: "Zero-Cloud Intelligence",
     description:
-      "Run Llama 3.2 1B Instruct natively on your CPU/RAM. Echo Spend categorizes transactions, detects anomalies, and drafts budget advice without a single API request.",
+      "Run the offline Echo AI engine natively on your CPU/RAM. Echo Spend categorizes transactions, detects anomalies, and drafts budget advice without a single API request.",
     image: "/app-screens/ai-insights.jpg",
     highlight: "18 tokens/sec locally on standard mobile processors",
   },
@@ -109,7 +109,7 @@ export default function Home() {
     },
     {
       q: "Does Echo Spend read my banking SMS messages?",
-      a: "Only with your explicit permission (Android only). If granted, the app reads incoming transaction alerts to draft records automatically. This parsing is done 100% locally on-device using regex patterns or your downloaded local AI model. No SMS text strings or financial numbers are ever sent to our servers.",
+      a: "Only with your explicit permission (Android only). If granted, the app reads incoming transaction alerts to draft records automatically. This parsing is done 100% locally on-device using regex patterns or your downloaded Echo AI model. No SMS text strings or financial numbers are ever sent to our servers.",
     },
     {
       q: "How does the Google Drive sync work?",
@@ -120,8 +120,8 @@ export default function Home() {
       a: "Echo Spend is currently under development for iOS and will be coming soon to the Apple App Store. However, because iOS restricts apps from reading incoming SMS messages, you will log transactions manually or attach receipt photos. The receipt scanner parses transaction details on-device, preserving your privacy.",
     },
     {
-      q: "What AI model runs on my phone?",
-      a: "Echo Spend integrates llama.rn to execute a GGUF format Llama 3.2 1B Instruct model directly in your device's RAM and CPU/DSP. You can download and initialize the model file directly in the app settings, allowing offline, semantic classification of transaction logs.",
+      q: "What is Echo AI?",
+      a: "Echo AI is our on-device intelligence engine that runs a lightweight Large Language Model (Llama 3.2 1B GGUF via llama.rn) directly in your device's RAM and CPU. You can download and initialize the model file directly in the app settings to enable offline, semantic classification of transaction logs.",
     },
   ];
 
@@ -142,7 +142,7 @@ export default function Home() {
               priceCurrency: "INR",
             },
             description:
-              "Echo Spend is an offline-first budget manager that categorizes transaction alerts using an on-device AI model. Zero surveillance.",
+              "Echo Spend is an offline-first budget manager that categorizes transaction alerts using an on-device Echo AI model. Zero surveillance.",
             aggregateRating: {
               "@type": "AggregateRating",
               ratingValue: "4.8",
@@ -252,7 +252,7 @@ export default function Home() {
             <p className={styles.subtitle}>
               Echo Spend is an offline-first budget manager that categorizes
               transaction alerts using an{" "}
-              <strong>on-device Llama AI model</strong>. No server logs, no
+              <strong>on-device Echo AI model</strong>. No server logs, no
               telemetry, and zero surveillance.
             </p>
             <div className={styles.heroCtas}>
@@ -283,7 +283,7 @@ export default function Home() {
                     priority
                   />
                 </div>
-                <div className={styles.glassLabel}>Local Llama AI</div>
+                <div className={styles.glassLabel}>Local Echo AI</div>
               </div>
               <div className={`${styles.stackedCard} ${styles.cardRight}`}>
                 <div className={styles.cardFrame}>
@@ -451,13 +451,13 @@ export default function Home() {
                 <line x1="8" y1="21" x2="16" y2="21"></line>
                 <line x1="12" y1="17" x2="12" y2="21"></line>
               </svg>
-              <h3 className={styles.cardTitle}>On-Device Llama 3.2 AI Model</h3>
+              <h3 className={styles.cardTitle}>On-Device Echo AI Engine</h3>
               <p className={styles.cardText}>
                 No network traffic, no server subscriptions. Echo Spend compiles
                 and executes a Large Language Model (Llama-3.2-1B GGUF via{" "}
-                <code>llama.rn</code>) natively on your device. It classifies
-                transaction details, detects anomalies, and matches budgets
-                entirely in your local system memory.
+                <code>llama.rn</code>) natively on your device. Named Echo AI,
+                it classifies transaction details, detects anomalies, and matches
+                budgets entirely in your local system memory.
               </p>
             </div>
 
@@ -566,7 +566,7 @@ export default function Home() {
                   className={styles.flowTerminal}
                   style={{ color: "var(--accent-purple)" }}
                 >
-                  2. Embedded Llama / Regex
+                  2. Echo AI / Regex
                 </span>
                 <span
                   style={{ fontSize: "0.8rem", color: "var(--accent-purple)" }}
