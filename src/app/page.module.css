@@ -865,6 +865,179 @@
     line-height: 1.6;
 }
 
+/* --- App Download / CTA Section --- */
+.downloadSection {
+    padding: 100px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.downloadContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 80px;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.downloadContent {
+    flex: 1;
+    max-width: 550px;
+}
+
+.downloadContent h2 {
+    font-size: 3rem;
+    line-height: 1.15;
+    margin-bottom: 24px;
+    font-weight: 800;
+}
+
+.downloadContent p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+}
+
+.downloadButtons {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.qrCardContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qrCard {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    border-radius: 24px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: transform var(--transition-speed), border-color var(--transition-speed);
+}
+
+.qrCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(var(--accent-purple-rgb), 0.15), transparent 60%);
+    pointer-events: none;
+}
+
+.qrCard:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-purple);
+}
+
+.qrCodeWrapper {
+    position: relative;
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.qrImage {
+    display: block;
+    border-radius: 8px;
+}
+
+.qrLogoWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    padding: 4px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.qrLogo {
+    border-radius: 4px;
+    display: block;
+}
+
+/* Pulsating green scanner line animation */
+.qrScanLine {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #30d158, transparent);
+    box-shadow: 0 0 8px #30d158;
+    animation: qrScan 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes qrScan {
+    0% {
+        top: 12px;
+    }
+    50% {
+        top: calc(100% - 15px);
+    }
+    100% {
+        top: 12px;
+    }
+}
+
+.qrMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+}
+
+.androidIcon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+    transition: color var(--transition-speed);
+}
+
+.qrCard:hover .androidIcon {
+    color: #30d158;
+}
+
+.qrText {
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-heading);
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.qrCard:hover .qrText {
+    color: var(--text-primary);
+}
+
 /* --- Footer --- */
 .footer {
     border-top: 1px solid var(--header-border);
@@ -1013,6 +1186,28 @@
 
     .phoneMockupFrame {
         margin-top: 24px;
+    }
+
+    .downloadContainer {
+        flex-direction: column;
+        text-align: center;
+        gap: 48px;
+    }
+    
+    .downloadContent {
+        max-width: 600px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .downloadContent h2,
+    .downloadContent p {
+        text-align: center;
+    }
+    
+    .downloadButtons {
+        justify-content: center;
     }
 }
 
@@ -1199,5 +1394,13 @@
         height: 360px;
         border-width: 6px;
         border-radius: 24px;
+    }
+
+    .qrCardContainer {
+        display: none;
+    }
+    
+    .downloadContent h2 {
+        font-size: 2.2rem;
     }
 }

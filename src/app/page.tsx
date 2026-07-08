@@ -690,47 +690,72 @@ export default function Home() {
       </section>
 
       {/* App Download / CTA Section */}
-      <section
-        id="download"
-        className={styles.section}
-        style={{ textAlign: "center", position: "relative" }}
-      >
-        <div className={styles.container}>
-          <span
-            className={styles.badge}
-            style={{ color: "var(--accent-purple)" }}
-          >
-            Secure Your Ledger
-          </span>
-          <h2
-            className={styles.sectionTitle}
-            style={{ fontSize: "3rem", marginBottom: "24px" }}
-          >
-            Start Budgeting Privately Today
-          </h2>
-          <p
-            className={styles.sectionSubtitle}
-            style={{ maxWidth: "600px", margin: "0 auto 40px auto" }}
-          >
-            Available for Android (iOS coming soon). Download now to track
-            assets, budgets, and text alerts with absolute data sovereignty.
-          </p>
-          <div
-            style={{ display: "flex", justifyContent: "center", gap: "20px" }}
-          >
-            <a
-              href="https://play.google.com/store/apps/details?id=com.adkdinesh.echospend"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.btnDownload}
-              style={{
-                padding: "16px 36px",
-                fontSize: "1rem",
-                borderRadius: "40px",
-              }}
+      <section id="download" className={styles.downloadSection}>
+        <div className={`${styles.container} ${styles.downloadContainer}`}>
+          <div className={styles.downloadContent}>
+            <span
+              className={styles.badge}
+              style={{ color: "var(--accent-purple)" }}
             >
-              Download for Android
-            </a>
+              Secure Your Ledger
+            </span>
+            <h2 className={styles.sectionTitle}>
+              Start Budgeting Privately Today
+            </h2>
+            <p className={styles.sectionSubtitle}>
+              Available for Android (iOS coming soon). Download now to track
+              assets, budgets, and text alerts with absolute data sovereignty.
+            </p>
+            <div className={styles.downloadButtons}>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.adkdinesh.echospend"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.btnDownload}
+                style={{
+                  padding: "16px 36px",
+                  fontSize: "1rem",
+                  borderRadius: "40px",
+                }}
+              >
+                Download for Android
+              </a>
+            </div>
+          </div>
+
+          <div className={styles.qrCardContainer}>
+            <div className={styles.qrCard}>
+              <div className={styles.qrCodeWrapper}>
+                <Image
+                  src="/qr-playstore.svg"
+                  alt="Scan to Download Echo Spend"
+                  width={140}
+                  height={140}
+                  className={styles.qrImage}
+                />
+                <div className={styles.qrLogoWrapper}>
+                  <Image
+                    src="/logos/icon.png"
+                    alt="Echo Spend Logo"
+                    width={28}
+                    height={28}
+                    className={styles.qrLogo}
+                  />
+                </div>
+                <div className={styles.qrScanLine}></div>
+              </div>
+              <div className={styles.qrMeta}>
+                <svg
+                  className={styles.androidIcon}
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M17.52 14.3c-.02-.53-.42-.95-.95-.95-.53 0-.93.42-.95.95v1.4c.02.53.42.95.95.95.53 0 .93-.42.95-.95v-1.4zM8.38 14.3c-.02-.53-.42-.95-.95-.95-.53 0-.93.42-.95.95v1.4c.02.53.42.95.95.95.53 0 .93-.42.95-.95v-1.4zM20.25 10.3h-2.13l1.83-3.17c.18-.32.07-.72-.25-.9-.32-.18-.72-.07-.9.25L17 9.6c-1.39-.77-3.08-1.2-4.9-1.2-1.82 0-3.51.43-4.9 1.2L5.45 6.48c-.18-.32-.58-.43-.9-.25-.32.18-.43.58-.25.9l1.83 3.17H3.95c-.41 0-.75.34-.75.75v5.18c0 .41.34.75.75.75h1.22v2.82c0 .41.34.75.75.75h1.22c.41 0 .75-.34.75-.75v-2.82h3.66v2.82c0 .41.34.75.75.75h1.22c.41 0 .75-.34.75-.75v-2.82h1.22c.41 0 .75-.34.75-.75V11.05c0-.41-.34-.75-.75-.75z" />
+                </svg>
+                <span className={styles.qrText}>Scan to Download</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
