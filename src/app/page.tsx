@@ -1,60 +1,91 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./page.module.css";
 
+/* ── Tour Tabs (updated features & screenshots) ──────────────────────── */
 const tourTabs = [
   {
     title: "Smart Dashboard",
-    subtitle: "Unified Financial Control",
+    subtitle: "Net Worth & Spending Pulse",
     description:
-      "Get a clean, instant overview of your cash flows, account balances, and budgets. All powered by a secure local SQLite instance that never leaves your device.",
-    image: "/app-screens/dashboard.jpg",
-    highlight: "Fully Offline SQLite database sandbox",
+      "See your net worth, Safe to Spend budget pacing, linked bank accounts, and pending signals — all at a glance. Powered by a local SQLite database that never leaves your device.",
+    image: "/app-screens/01_dashboard.png",
+    highlight: "₹1,64,450 Net Worth · 13 days left in cycle",
   },
   {
-    title: "Local Echo AI Insights",
-    subtitle: "Zero-Cloud Intelligence",
+    title: "Smart Inbox",
+    subtitle: "Swipe to Categorize",
     description:
-      "Run the offline Echo AI engine natively on your CPU/RAM. Echo Spend categorizes transactions, detects anomalies, and drafts budget advice without a single API request.",
-    image: "/app-screens/ai-insights.jpg",
-    highlight: "18 tokens/sec locally on standard mobile processors",
+      "Your bank SMS alerts are parsed by on-device AI and presented as swipeable cards. Swipe right to confirm a transaction, left to dismiss. Zero typing required.",
+    image: "/app-screens/02_smart_inbox_deck.png",
+    image2: "/app-screens/03_smart_inbox_swipe_action.png",
+    highlight: "Tinder-style card deck · AI categorization",
   },
   {
-    title: "Smart Receipt Scan",
-    subtitle: "Instant OCR Extraction",
+    title: "Visual Analytics",
+    subtitle: "Charts & Category Breakdown",
     description:
-      "Take pictures of your receipts to extract amounts, dates, and merchants using on-device text recognition. Absolutely no image is ever uploaded to external servers.",
-    image: "/app-screens/smart-scan.jpg",
-    highlight: "Fully offline optical character recognition",
+      "Interactive spend trend charts, donut breakdowns by category, and daily/weekly/monthly views. Understand exactly where your money goes.",
+    image: "/app-screens/04_analytics_charts.png",
+    highlight: "7D / 14D / 30D / 90D spend analysis",
   },
   {
-    title: "Trends & Analytics",
-    subtitle: "WoW Spending Metrics",
+    title: "Budgets & Alerts",
+    subtitle: "Stay Ahead of Your Limits",
     description:
-      "Visualize weekly limits, track spending trends, and monitor multi-period budgets. Identify precisely where your money goes with detailed local charts.",
-    image: "/app-screens/trends.jpg",
-    highlight: "Interactive charts and week-over-week trends",
+      "Set category-level spending caps and get smart notifications when you're approaching your limit. Budget pacing shows if you're ahead or behind.",
+    image: "/app-screens/06_budgets_progress.png",
+    highlight: "Category budgets with pace tracking",
   },
   {
     title: "Subscriptions & Splits",
-    subtitle: "Manage Recurring Costs & Groups",
+    subtitle: "Recurring Bills & Group Expenses",
     description:
-      "Keep track of active subscriptions, billing cycles, and upcoming payments. Split restaurant bills or shared rent offline with friends securely.",
-    image: "/app-screens/subscriptions.jpg",
-    image2: "/app-screens/splits.jpg",
-    highlight: "Track recurring fees and manage shared tabs",
+      "Track Netflix, Cult.fit, and every recurring bill with monthly burn totals. Split dinner bills and trips with friends — track who owes what and settle up.",
+    image: "/app-screens/07_subscriptions.png",
+    image2: "/app-screens/08_split_expenses.png",
+    highlight: "Monthly burn: ₹2,148 · Split with 3 people",
   },
   {
-    title: "Cards & Loans Tracker",
-    subtitle: "Balance and Debt Management",
+    title: "Goals & Loans",
+    subtitle: "Target Savings & EMI Tracker",
     description:
-      "Monitor credit card balances, credit utilization ratios, outstanding loans, and monthly EMI schedules. Never miss a payment or let interest pile up.",
-    image: "/app-screens/credit-cards.jpg",
-    image2: "/app-screens/loans.jpg",
-    highlight: "Credit utilization warnings & EMI scheduling",
+      "Set savings targets with deadlines and monthly contribution plans. Track loan EMIs, interest rates, and remaining balances — both borrowed and lent.",
+    image: "/app-screens/09_goals_and_loans.png",
+    highlight: "40% achieved · ₹25,000/mo plan",
+  },
+];
+
+/* ── Bank marquee items ──────────────────────────────────────────────── */
+const banks = [
+  "HDFC Bank", "ICICI Bank", "SBI", "Axis Bank", "Kotak", "CRED",
+  "Jupiter", "Paytm", "Bank of Baroda", "IndusInd", "Yes Bank", "PNB",
+];
+
+/* ── FAQ data ────────────────────────────────────────────────────────── */
+const faqs = [
+  {
+    q: "How is Echo Spend different from other budgeting apps?",
+    a: "Most finance apps require linking your bank credentials or uploading statements to their servers. Echo Spend is 100% local-first — all data is stored in a SQLite database on your phone. No cloud servers exist to hack. Your money is your business.",
+  },
+  {
+    q: "Does Echo Spend read my banking SMS messages?",
+    a: "Only with your explicit permission (Android only). The app reads incoming bank transaction alerts and parses them using a combination of regex patterns and an on-device AI model (Qwen 2.5 1.5B). No SMS text is ever sent to any server.",
+  },
+  {
+    q: "How does the Google Drive backup work?",
+    a: "Echo Spend uses Google Sign-In to upload your encrypted database to a hidden, app-specific sandbox in your personal Google Drive (appDataFolder). Even the developers cannot access this folder. You can also export as CSV anytime.",
+  },
+  {
+    q: "What is the on-device AI model?",
+    a: "Echo Spend includes a fine-tuned Qwen 2.5 1.5B language model (GGUF format, ~940MB) that runs entirely on your phone's CPU via llama.rn. It classifies merchants, categorizes transactions, detects spend anomalies, and generates financial tips — all offline.",
+  },
+  {
+    q: "Is Echo Spend free?",
+    a: "The core app is free to download and use. Premium features like multiple themes, advanced analytics, and the AI financial advisor are available through an optional subscription.",
   },
 ];
 
@@ -63,26 +94,45 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [activeTourTab, setActiveTourTab] = useState(0);
   const [activeSubTab, setActiveSubTab] = useState(0);
-  // Initialize theme
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Scroll-triggered reveal animation
+  const revealRefs = useRef<(HTMLElement | null)[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add(styles.visible);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+    revealRefs.current.forEach((el) => el && observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  const addRevealRef = (el: HTMLElement | null) => {
+    if (el && !revealRefs.current.includes(el)) revealRefs.current.push(el);
+  };
+
+  // Theme initialization
   useEffect(() => {
     const savedTheme = localStorage.getItem("echo-spend-theme");
     const body = document.body;
-    let isDarkTheme = true;
+    let dark = true;
     if (savedTheme) {
       body.className = savedTheme + "-theme";
-      isDarkTheme = savedTheme === "dark";
+      dark = savedTheme === "dark";
     } else {
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       body.className = prefersDark ? "dark-theme" : "light-theme";
-      isDarkTheme = prefersDark;
+      dark = prefersDark;
     }
-
-    const timer = setTimeout(() => {
-      setIsDark(isDarkTheme);
-    }, 0);
-    return () => clearTimeout(timer);
+    setTimeout(() => setIsDark(dark), 0);
   }, []);
 
   const handleThemeToggle = () => {
@@ -98,69 +148,46 @@ export default function Home() {
     }
   };
 
-  const toggleFaq = (index: number) => {
-    setOpenFaq(openFaq === index ? null : index);
-  };
-
-  const faqs = [
-    {
-      q: "How is Echo Spend different from other budgeting apps?",
-      a: "Traditional budgeting apps require linking your bank account credentials or uploading statements to their cloud databases, storing your personal financial life on their servers. Echo Spend is offline-first. It processes and stores all your data right on your phone in a local SQLite file. Your money is your business; we don't own, see, or sell your data.",
-    },
-    {
-      q: "Does Echo Spend read my banking SMS messages?",
-      a: "Only with your explicit permission (Android only). If granted, the app reads incoming transaction alerts to draft records automatically. This parsing is done 100% locally on-device using regex patterns or your downloaded Echo AI model. No SMS text strings or financial numbers are ever sent to our servers.",
-    },
-    {
-      q: "How does the Google Drive sync work?",
-      a: "If you choose to sync your data, Echo Spend authenticates via Google Sign-In and uploads your encrypted database directly to a hidden, application-specific sandbox in your personal Google Drive (the appDataFolder). The developers and third parties have no access to this folder, and Echo Spend has no access to your other Google Drive files.",
-    },
-    {
-      q: "Can I use Echo Spend on iOS?",
-      a: "Echo Spend is currently under development for iOS and will be coming soon to the Apple App Store. However, because iOS restricts apps from reading incoming SMS messages, you will log transactions manually or attach receipt photos. The receipt scanner parses transaction details on-device, preserving your privacy.",
-    },
-    {
-      q: "What is Echo AI?",
-      a: "Echo AI is our on-device intelligence engine that runs a lightweight Large Language Model (Llama 3.2 1B GGUF via llama.rn) directly in your device's RAM and CPU. You can download and initialize the model file directly in the app settings to enable offline, semantic classification of transaction logs.",
-    },
-  ];
-
   return (
     <>
+      {/* ── Schema.org Structured Data ──────────────────────────────── */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
+            "@type": "MobileApplication",
             name: "Echo Spend",
-            operatingSystem: "Android, iOS",
+            operatingSystem: "Android",
             applicationCategory: "FinanceApplication",
-            offers: {
-              "@type": "Offer",
-              price: "0.00",
-              priceCurrency: "INR",
-            },
+            offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
             description:
-              "Echo Spend is an offline-first budget manager that categorizes transaction alerts using an on-device Echo AI model. Zero surveillance.",
+              "India's most private finance app. On-device AI reads bank SMS offline, auto-categorizes spending, tracks budgets, subscriptions & split expenses — all 100% on your phone.",
             aggregateRating: {
               "@type": "AggregateRating",
               ratingValue: "4.8",
               ratingCount: "142",
             },
+            featureList:
+              "SMS Auto-Parsing, On-Device AI, Budget Tracking, Subscription Management, Split Expenses, Google Drive Backup, Biometric Lock",
+            softwareVersion: "1.1.0",
           }),
         }}
       />
-      {/* Header / Navbar */}
+
+      {/* ══════════════════════════════════════════════════════════════
+          HEADER / NAVIGATION
+          ══════════════════════════════════════════════════════════════ */}
       <header className={styles.header}>
         <div className={`${styles.container} ${styles.headerContainer}`}>
+          {/* Logo */}
           <Link href="#" className={styles.logo}>
             <div className={styles.logoWrapper}>
               <Image
-                src="/logos/icon.png"
+                src="/app-screens/app_logo.png"
                 alt="Echo Spend Logo"
-                width={36}
-                height={36}
+                width={34}
+                height={34}
                 className={styles.logoImage}
                 priority
               />
@@ -168,515 +195,339 @@ export default function Home() {
             <span className={styles.brandText}>Echo Spend</span>
           </Link>
 
-          <nav>
+          {/* Desktop Navigation Links */}
+          <nav className={styles.desktopNav}>
             <ul className={styles.navLinks}>
-              <li>
-                <a href="#features" className={styles.navLink}>
-                  Features
-                </a>
-              </li>
-              <li>
-                <a href="#trust" className={styles.navLink}>
-                  Architecture
-                </a>
-              </li>
-              <li>
-                <a href="#faq" className={styles.navLink}>
-                  FAQs
-                </a>
-              </li>
-              <li>
-                <Link href="/privacy" className={styles.navLink}>
-                  Privacy Policy
-                </Link>
-              </li>
+              <li><a href="#features" className={styles.navLink}>Features</a></li>
+              <li><a href="#privacy" className={styles.navLink}>Privacy</a></li>
+              <li><a href="#ai-advisor" className={styles.navLink}>AI Advisor</a></li>
+              <li><a href="#themes" className={styles.navLink}>Themes</a></li>
+              <li><a href="#faq" className={styles.navLink}>FAQs</a></li>
             </ul>
           </nav>
 
+          {/* Right Header Controls */}
           <div className={styles.headerActions}>
-            <button
-              onClick={handleThemeToggle}
-              className={styles.themeToggleBtn}
-              aria-label="Toggle Theme"
-            >
+            <button onClick={handleThemeToggle} className={styles.themeToggleBtn} aria-label="Toggle Theme">
               {isDark ? (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ width: "20px", height: "20px" }}
-                >
-                  <circle cx="12" cy="12" r="5"></circle>
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                  <line x1="1" y1="12" x2="3" y2="12"></line>
-                  <line x1="21" y1="12" x2="23" y2="12"></line>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
+                  <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                 </svg>
               ) : (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ width: "20px", height: "20px" }}
-                >
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18 }}>
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               )}
             </button>
-            <a href="#download" className={styles.btnDownload}>
-              <span>Get the App</span>
+
+            <a href="https://play.google.com/store/apps/details?id=com.adkdinesh.echospend" className={styles.headerCta} target="_blank" rel="noopener noreferrer">
+              <span>Download Free</span>
             </a>
+
+            <button
+              className={`${styles.hamburger} ${mobileNavOpen ? styles.hamburgerActive : ""}`}
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            >
+              <span /><span /><span />
+            </button>
           </div>
+        </div>
+
+        {/* Mobile Navigation Dropdown Drawer */}
+        <div className={`${styles.mobileMenu} ${mobileNavOpen ? styles.mobileMenuOpen : ""}`}>
+          <nav className={styles.mobileNav}>
+            <a href="#features" className={styles.mobileNavLink} onClick={() => setMobileNavOpen(false)}>
+              <span>App Features</span> <span className={styles.chevron}>→</span>
+            </a>
+            <a href="#privacy" className={styles.mobileNavLink} onClick={() => setMobileNavOpen(false)}>
+              <span>Privacy Guarantee</span> <span className={styles.chevron}>→</span>
+            </a>
+            <a href="#ai-advisor" className={styles.mobileNavLink} onClick={() => setMobileNavOpen(false)}>
+              <span>On-Device AI</span> <span className={styles.chevron}>→</span>
+            </a>
+            <a href="#themes" className={styles.mobileNavLink} onClick={() => setMobileNavOpen(false)}>
+              <span>Curated Themes</span> <span className={styles.chevron}>→</span>
+            </a>
+            <a href="#faq" className={styles.mobileNavLink} onClick={() => setMobileNavOpen(false)}>
+              <span>FAQs</span> <span className={styles.chevron}>→</span>
+            </a>
+            <Link href="/privacy" className={styles.mobileNavLink} onClick={() => setMobileNavOpen(false)}>
+              <span>Privacy Policy</span> <span className={styles.chevron}>→</span>
+            </Link>
+
+            <div className={styles.mobileMenuCtaWrap}>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.adkdinesh.echospend"
+                className={styles.mobileMenuCta}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 0 1 0 1.38l-2.302 2.302L15.396 12l2.302-2.492zM5.864 3.467l10.937 6.333-2.302 2.302L5.864 3.467z" /></svg>
+                Download for Android — Free
+              </a>
+            </div>
+          </nav>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className={styles.hero}>
+      {/* ══════════════════════════════════════════════════════════════
+          HERO SECTION
+          ══════════════════════════════════════════════════════════════ */}
+      <section className={styles.hero} id="hero" aria-labelledby="hero-heading">
         <div className={`${styles.container} ${styles.heroGrid}`}>
           <div className={styles.heroContent}>
-            <span className={styles.badge}>Next-Gen Financial Ownership</span>
-            <h1 className={styles.title}>
-              Take Back Control of Your <br />
-              <span className={styles.titleAccent}>Financial Privacy</span>
+            <span className={styles.badge}>
+              <span className={styles.badgeDot} /> 100% Private · On-Device AI
+            </span>
+            <h1 id="hero-heading" className={styles.title}>
+              Automate Your Budget. <br />
+              <span className={styles.titleAccent}>Keep Your Data Private.</span>
             </h1>
             <p className={styles.subtitle}>
-              Echo Spend is an offline-first budget manager that categorizes
-              transaction alerts using an{" "}
-              <strong>on-device Echo AI model</strong>. No server logs, no
-              telemetry, and zero surveillance.
+              EchoSpend reads your bank SMS alerts with a local AI model — completely
+              offline. No cloud servers, no bank linking, no data leaks.
+              Your finances stay on <em>your</em> phone.
             </p>
             <div className={styles.heroCtas}>
               <a
                 href="#download"
-                className={styles.btnDownload}
-                style={{ padding: "14px 28px", fontSize: "1rem" }}
+                className={styles.btnPrimary}
               >
-                Download Now
-              </a>
-              <a href="#features" className={styles.btnSecondary}>
-                Explore Features
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 0 1 0 1.38l-2.302 2.302L15.396 12l2.302-2.492zM5.864 3.467l10.937 6.333-2.302 2.302L5.864 3.467z" /></svg>
+                Download for Android
               </a>
             </div>
           </div>
 
-          {/* Layered Screenshot Stack Showcase */}
           <div className={styles.heroShowcase}>
-            <div className={styles.screenshotStack}>
-              <div className={`${styles.stackedCard} ${styles.cardLeft}`}>
-                <div className={styles.cardFrame}>
-                  <Image
-                    src="/app-screens/ai-insights.jpg"
-                    alt="AI Insights Screen"
-                    width={210}
-                    height={420}
-                    className={styles.screenshotImg}
-                    priority
-                  />
-                </div>
-                <div className={styles.glassLabel}>Local Echo AI</div>
+            <div className={styles.phoneGlow}>
+              <div className={styles.phoneMockup}>
+                <Image
+                  src="/app-screens/01_dashboard.png"
+                  alt="Echo Spend dashboard showing ₹1,64,450 net worth, linked HDFC and ICICI accounts, Safe to Spend tracker"
+                  width={300}
+                  height={650}
+                  priority
+                  className={styles.phoneScreenImg}
+                />
               </div>
-              <div className={`${styles.stackedCard} ${styles.cardRight}`}>
-                <div className={styles.cardFrame}>
-                  <Image
-                    src="/app-screens/trends.jpg"
-                    alt="Trends Screen"
-                    width={210}
-                    height={420}
-                    className={styles.screenshotImg}
-                    priority
-                  />
-                </div>
-                <div className={styles.glassLabel}>Analytics & WoW</div>
-              </div>
-              <div className={`${styles.stackedCard} ${styles.cardCenter}`}>
-                <div className={styles.cardFrame}>
-                  <Image
-                    src="/app-screens/dashboard.jpg"
-                    alt="Dashboard Screen"
-                    width={230}
-                    height={460}
-                    className={styles.screenshotImg}
-                    priority
-                  />
-                </div>
-                <div className={styles.glassLabelMain}>Smart Dashboard</div>
-              </div>
+            </div>
+            {/* Floating badges */}
+            <div className={`${styles.floatingBadge} ${styles.floatingLeft}`}>
+              <span className={styles.floatingIcon}>🛡️</span>
+              <div><strong>100% Private</strong><span>Zero cloud servers</span></div>
+            </div>
+            <div className={`${styles.floatingBadge} ${styles.floatingRight}`}>
+              <span className={styles.floatingIcon}>🤖</span>
+              <div><strong>On-Device AI</strong><span>Offline SMS parsing</span></div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Interactive Experience Tour Section */}
-      <section id="tour" className={styles.tourSection}>
+      {/* ══════════════════════════════════════════════════════════════
+          BANK MARQUEE
+          ══════════════════════════════════════════════════════════════ */}
+      <section className={styles.bankSection} aria-label="Supported Indian banks">
+        <p className={styles.bankTitle}>Works with every major Indian bank</p>
+        <div className={styles.marquee} aria-hidden="true">
+          {[...banks, ...banks].map((name, i) => (
+            <div key={i} className={styles.marqueeItem}>🏦 {name}</div>
+          ))}
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          INTERACTIVE FEATURE TOUR
+          ══════════════════════════════════════════════════════════════ */}
+      <section id="features" className={styles.tourSection} ref={addRevealRef}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <span className={styles.badge}>App Walkthrough</span>
-            <h2 className={styles.sectionTitle}>Interactive Feature Tour</h2>
+            <span className={styles.badge}><span className={styles.badgeDot} /> App Walkthrough</span>
+            <h2 className={styles.sectionTitle}>See Every Feature in Action</h2>
             <p className={styles.sectionSubtitle}>
-              Take a look at the official screens of the Echo Spend mobile app
-              to see how it operates 100% offline.
+              Tap through the feature tabs to explore the official app screens.
+              Everything runs 100% on your device.
             </p>
           </div>
 
           <div className={styles.tourLayout}>
+            {/* Column 1: Tabs */}
             <div className={styles.tourTabs}>
               {tourTabs.map((tab, idx) => (
                 <button
                   key={idx}
                   className={`${styles.tourTab} ${activeTourTab === idx ? styles.tourTabActive : ""}`}
-                  onClick={() => {
-                    setActiveTourTab(idx);
-                    setActiveSubTab(0);
-                  }}
+                  onClick={() => { setActiveTourTab(idx); setActiveSubTab(0); }}
                 >
                   <span className={styles.tourTabNumber}>0{idx + 1}</span>
                   <div className={styles.tourTabMeta}>
                     <span className={styles.tourTabTitle}>{tab.title}</span>
-                    <span className={styles.tourTabSubtitle}>
-                      {tab.subtitle}
-                    </span>
+                    <span className={styles.tourTabSubtitle}>{tab.subtitle}</span>
                   </div>
                 </button>
               ))}
             </div>
 
-            <div className={styles.tourShowcase}>
-              <div className={styles.tourDetailsCard}>
-                <span className={styles.tourCategory}>
-                  {tourTabs[activeTourTab].subtitle}
-                </span>
-                <h3 className={styles.tourTitle}>
-                  {tourTabs[activeTourTab].title}
-                </h3>
-                <p className={styles.tourText}>
-                  {tourTabs[activeTourTab].description}
-                </p>
+            {/* Column 2: Details */}
+            <div className={styles.tourDetailsCard}>
+              <span className={styles.tourCategory}>{tourTabs[activeTourTab].subtitle}</span>
+              <h3 className={styles.tourTitle}>{tourTabs[activeTourTab].title}</h3>
+              <p className={styles.tourText}>{tourTabs[activeTourTab].description}</p>
 
-                {/* Secondary screen toggle (if exists) */}
-                {tourTabs[activeTourTab].image2 && (
-                  <div className={styles.subTabContainer}>
-                    <button
-                      className={`${styles.subTabButton} ${activeSubTab === 0 ? styles.subTabActive : ""}`}
-                      onClick={() => setActiveSubTab(0)}
-                    >
-                      {activeTourTab === 4 ? "Subscriptions" : "Credit Cards"}
-                    </button>
-                    <button
-                      className={`${styles.subTabButton} ${activeSubTab === 1 ? styles.subTabActive : ""}`}
-                      onClick={() => setActiveSubTab(1)}
-                    >
-                      {activeTourTab === 4 ? "Bill Splits" : "Loans Tracker"}
-                    </button>
-                  </div>
-                )}
+              {tourTabs[activeTourTab].image2 && (
+                <div className={styles.subTabContainer}>
+                  <button className={`${styles.subTabButton} ${activeSubTab === 0 ? styles.subTabActive : ""}`} onClick={() => setActiveSubTab(0)}>
+                    {activeTourTab === 1 ? "Inbox Deck" : activeTourTab === 4 ? "Subscriptions" : "Primary"}
+                  </button>
+                  <button className={`${styles.subTabButton} ${activeSubTab === 1 ? styles.subTabActive : ""}`} onClick={() => setActiveSubTab(1)}>
+                    {activeTourTab === 1 ? "Swipe Action" : activeTourTab === 4 ? "Split Expenses" : "Secondary"}
+                  </button>
+                </div>
+              )}
 
-                <div className={styles.tourBadge}>
-                  <span className={styles.badgeDot}></span>
-                  {tourTabs[activeTourTab].highlight}
+              <div className={styles.tourBadge}>
+                <span className={styles.badgeDot} />
+                {tourTabs[activeTourTab].highlight}
+              </div>
+            </div>
+
+            {/* Column 3: Phone Image */}
+            <div className={styles.phoneMockupFrame}>
+              <div className={styles.phoneMockupScreen}>
+                <div className={styles.screenWrapper}>
+                  <Image
+                    src={activeSubTab === 1 && tourTabs[activeTourTab].image2
+                      ? tourTabs[activeTourTab].image2!
+                      : tourTabs[activeTourTab].image}
+                    alt={tourTabs[activeTourTab].title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 360px"
+                    className={styles.phoneScreenImg}
+                    priority={activeTourTab === 0}
+                  />
                 </div>
               </div>
-
-              <div className={styles.phoneMockupFrame}>
-                <div className={styles.phoneMockupCamera}></div>
-                <div className={styles.phoneMockupScreen}>
-                  <div className={styles.screenWrapper}>
-                    <Image
-                      src={
-                        activeSubTab === 1 && tourTabs[activeTourTab].image2
-                          ? tourTabs[activeTourTab].image2
-                          : tourTabs[activeTourTab].image
-                      }
-                      alt={tourTabs[activeTourTab].title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 360px"
-                      className={styles.phoneScreenImg}
-                      priority={activeTourTab === 0}
-                    />
-                  </div>
-                </div>
-                <div className={styles.phoneMockupGlow}></div>
-              </div>
+              <div className={styles.phoneMockupGlow} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section
-        id="features"
-        className={styles.section}
-        style={{
-          backgroundColor: "var(--bg-secondary)",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
+      {/* ══════════════════════════════════════════════════════════════
+          PRIVACY SECTION
+          ══════════════════════════════════════════════════════════════ */}
+      <section id="privacy" className={styles.section} style={{ backgroundColor: "var(--bg-secondary)" }} ref={addRevealRef}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <span className={styles.badge}>Security Architecture</span>
-            <h2 className={styles.sectionTitle}>
-              Built for Complete Financial Agency
-            </h2>
+            <span className={styles.badge}><span className={styles.badgeDot} /> Absolute Privacy</span>
+            <h2 className={styles.sectionTitle}>Your Financial Data Deserves Absolute Protection</h2>
             <p className={styles.sectionSubtitle}>
-              Every component is designed to guarantee privacy without
-              sacrificing automated budgeting features.
+              EchoSpend has zero-trust architecture. No remote servers. No third-party APIs. No bank credentials. Everything stays encrypted on your device.
             </p>
           </div>
 
-          <div className={styles.bentoGrid}>
-            {/* Feature 1 */}
-            <div
-              className={`${styles.bentoCard} ${styles.bentoCardCol2} ${styles.bentoCardLlama}`}
-            >
-              <svg
-                className={styles.cardIcon}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                <line x1="8" y1="21" x2="16" y2="21"></line>
-                <line x1="12" y1="17" x2="12" y2="21"></line>
-              </svg>
-              <h3 className={styles.cardTitle}>On-Device Echo AI Engine</h3>
-              <p className={styles.cardText}>
-                No network traffic, no server subscriptions. Echo Spend compiles
-                and executes a Large Language Model (Llama-3.2-1B GGUF via{" "}
-                <code>llama.rn</code>) natively on your device. Named Echo AI,
-                it classifies transaction details, detects anomalies, and matches
-                budgets entirely in your local system memory.
-              </p>
+          <div className={styles.privacyGrid}>
+            <div className={styles.privacyCard}>
+              <div className={`${styles.privacyIcon} ${styles.iconGreen}`}>🔒</div>
+              <h3 className={styles.cardTitle}>Zero Cloud Servers</h3>
+              <p className={styles.cardText}>No data ever leaves your phone. There is no backend server to hack. Your transactions, categories, and budgets exist only in a local SQLite database on your device.</p>
             </div>
-
-            {/* Feature 2 */}
-            <div className={styles.bentoCard}>
-              <svg
-                className={styles.cardIcon}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              <h3 className={styles.cardTitle}>SQLite Sandbox</h3>
-              <p className={styles.cardText}>
-                All financial data—accounts, balances, drafts, budgets—is stored
-                securely in your app sandbox via <code>expo-sqlite</code>. No
-                external database replication occurs.
-              </p>
+            <div className={styles.privacyCard}>
+              <div className={`${styles.privacyIcon} ${styles.iconAmber}`}>🏦</div>
+              <h3 className={styles.cardTitle}>No Bank Account Linking</h3>
+              <p className={styles.cardText}>We never ask for bank logins or account aggregation credentials. EchoSpend reads standard text SMS alerts — the same messages your bank already sends you.</p>
             </div>
-
-            {/* Feature 3 */}
-            <div className={styles.bentoCard}>
-              <svg
-                className={styles.cardIcon}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-              </svg>
-              <h3 className={styles.cardTitle}>Drive Isolated Sync</h3>
-              <p className={styles.cardText}>
-                Backup and restore your data using Google Sign-In linked
-                directly to the Google Drive <code>appDataFolder</code>. It
-                keeps files hidden from other cloud services.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className={`${styles.bentoCard} ${styles.bentoCardCol2}`}>
-              <svg
-                className={styles.cardIcon}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-              <h3 className={styles.cardTitle}>
-                Smart Budgets & WoW Analytics
-              </h3>
-              <p className={styles.cardText}>
-                Set multi-period category limits and get deterministic insights.
-                Compare week-over-week (WoW) totals, examine daily spending
-                thresholds, and receive warning reports when you are approaching
-                limits.
-              </p>
+            <div className={styles.privacyCard}>
+              <div className={`${styles.privacyIcon} ${styles.iconViolet}`}>☁️</div>
+              <h3 className={styles.cardTitle}>Private Google Drive Backup</h3>
+              <p className={styles.cardText}>When you choose to back up, data goes to <em>your personal</em> Google Drive&apos;s hidden app folder. Even the developers can&apos;t access it. Secured with biometric lock.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust & Architecture Section */}
-      <section id="trust" className={styles.section}>
-        <div className={styles.container}>
+      {/* ══════════════════════════════════════════════════════════════
+          AI ADVISOR SECTION
+          ══════════════════════════════════════════════════════════════ */}
+      <section id="ai-advisor" className={styles.aiSection} ref={addRevealRef}>
+        <div className={`${styles.container} ${styles.aiGrid}`}>
+          <div className={styles.aiVisual}>
+            <div className={styles.aiOrb}>
+              <div className={styles.aiOrbDot} />
+              <div className={styles.aiOrbDot} />
+              <div className={styles.aiOrbDot} />
+              <div className={styles.aiOrbInner}>
+                <span className={styles.aiOrbIcon}>✨</span>
+                <span className={styles.aiOrbLabel}>On-Device AI</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.aiContent}>
+            <span className={styles.badge}><span className={styles.badgeDot} /> Pocket Financial Advisor</span>
+            <h2 className={styles.sectionTitle}>AI that runs on your phone, not in a data center.</h2>
+            <p className={styles.sectionSubtitle} style={{ textAlign: "left", maxWidth: 500 }}>
+              EchoSpend ships a fine-tuned <strong>Qwen 2.5 1.5B</strong> language model
+              that runs entirely on your phone&apos;s CPU. It parses bank SMS, categorizes
+              merchants, detects spend anomalies, and generates personalized financial tips —
+              without ever sending a byte to the internet.
+            </p>
+            <div className={styles.aiChips}>
+              <span className={styles.chip}>🔎 Spend Anomaly Detection</span>
+              <span className={styles.chip}>💡 Personalized Tips</span>
+              <span className={styles.chip}>📱 100% Offline</span>
+              <span className={styles.chip}>📊 Smart Categorization</span>
+              <span className={styles.chip}>🏦 50+ Bank Formats</span>
+              <span className={styles.chip}>⚡ Real-time SMS Parsing</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          THEME SHOWCASE
+          ══════════════════════════════════════════════════════════════ */}
+      <section id="themes" className={styles.section} ref={addRevealRef}>
+        <div className={styles.container} style={{ textAlign: "center" }}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Zero-Cloud Architecture</h2>
+            <span className={styles.badge}><span className={styles.badgeDot} /> Curated Themes</span>
+            <h2 className={styles.sectionTitle}>Make it yours.</h2>
             <p className={styles.sectionSubtitle}>
-              Here is exactly how transaction processing behaves, illustrating
-              why your financial records are inaccessible to third parties.
+              Five handcrafted color palettes — Echo, Ember, Rose, Midnight, and Mono —
+              each with light and dark mode.
             </p>
           </div>
-
-          <div className={styles.trustContainer}>
-            <div className={styles.archGraphic}>
-              <div className={styles.flowItem}>
-                <span className={styles.flowTerminal}>
-                  1. Incoming bank SMS
-                </span>
-                <span
-                  style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}
-                >
-                  Received locally
-                </span>
-              </div>
-              <div className={styles.flowArrow}>↓</div>
-              <div
-                className={styles.flowItem}
-                style={{
-                  borderStyle: "dashed",
-                  borderColor: "var(--accent-purple)",
-                }}
-              >
-                <span
-                  className={styles.flowTerminal}
-                  style={{ color: "var(--accent-purple)" }}
-                >
-                  2. Echo AI / Regex
-                </span>
-                <span
-                  style={{ fontSize: "0.8rem", color: "var(--accent-purple)" }}
-                >
-                  Processed in RAM
-                </span>
-              </div>
-              <div className={styles.flowArrow}>↓</div>
-              <div className={styles.flowItem}>
-                <span className={styles.flowTerminal}>
-                  3. Sandbox SQLite Database
-                </span>
-                <span
-                  style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}
-                >
-                  Stored in echospend.db
-                </span>
-              </div>
-              <div className={styles.flowArrow}>↓</div>
-              <div
-                className={styles.flowItem}
-                style={{
-                  backgroundColor: "rgba(48, 209, 88, 0.05)",
-                  borderColor: "#30d158",
-                }}
-              >
-                <span
-                  className={styles.flowTerminal}
-                  style={{ color: "#30d158" }}
-                >
-                  4. Personal Google Drive (Optional)
-                </span>
-                <span style={{ fontSize: "0.8rem", color: "#30d158" }}>
-                  Encrypted appDataFolder
-                </span>
-              </div>
+          <div className={styles.themePhones}>
+            <div className={styles.phoneMockup} style={{ width: 200 }}>
+              <Image src="/app-screens/11_theme_echo.png" alt="Echo theme" width={200} height={434} className={styles.phoneScreenImg} loading="lazy" />
             </div>
-
-            <div className={styles.trustContent}>
-              <div className={styles.trustList}>
-                <div className={styles.trustItem}>
-                  <div className={styles.trustNumber}>1</div>
-                  <div>
-                    <h4 className={styles.trustItemTitle}>
-                      Zero Telemetry, Zero Logs
-                    </h4>
-                    <p className={styles.trustItemText}>
-                      We don&apos;t use telemetry hooks, crash reporting
-                      brokers, or database replication channels. If the app is
-                      offline, it works perfectly.
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.trustItem}>
-                  <div className={styles.trustNumber}>2</div>
-                  <div>
-                    <h4 className={styles.trustItemTitle}>
-                      Private Sandbox Keychain
-                    </h4>
-                    <p className={styles.trustItemText}>
-                      Sensitive tokens, local authentication setups, and
-                      encryption keys are stored inside system keychains via{" "}
-                      <code>expo-secure-store</code>, isolated from other apps.
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.trustItem}>
-                  <div className={styles.trustNumber}>3</div>
-                  <div>
-                    <h4 className={styles.trustItemTitle}>
-                      Your Data, Your File
-                    </h4>
-                    <p className={styles.trustItemText}>
-                      Export your transaction ledger as a standard CSV format
-                      file instantly. Clear all data, including local backups,
-                      with a single tap.
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className={styles.phoneMockup} style={{ width: 200 }}>
+              <Image src="/app-screens/12_theme_ember.png" alt="Ember theme" width={200} height={434} className={styles.phoneScreenImg} loading="lazy" />
+            </div>
+            <div className={styles.phoneMockup} style={{ width: 200 }}>
+              <Image src="/app-screens/13_theme_rose.png" alt="Rose theme" width={200} height={434} className={styles.phoneScreenImg} loading="lazy" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Accordion Section */}
-      <section
-        id="faq"
-        className={styles.section}
-        style={{ backgroundColor: "var(--bg-secondary)" }}
-      >
+      {/* ══════════════════════════════════════════════════════════════
+          FAQ SECTION
+          ══════════════════════════════════════════════════════════════ */}
+      <section id="faq" className={styles.section} style={{ backgroundColor: "var(--bg-secondary)" }} ref={addRevealRef}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Frequently Asked Questions</h2>
-            <p className={styles.sectionSubtitle}>
-              Quick answers regarding permissions, model operations, and
-              security standards.
-            </p>
+            <p className={styles.sectionSubtitle}>Quick answers about permissions, AI model, and privacy.</p>
           </div>
 
           <div className={styles.faqContainer}>
             {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className={`${styles.faqItem} ${openFaq === idx ? styles.faqItemOpen : ""}`}
-              >
-                <button
-                  className={styles.faqTrigger}
-                  onClick={() => toggleFaq(idx)}
-                >
+              <div key={idx} className={`${styles.faqItem} ${openFaq === idx ? styles.faqItemOpen : ""}`}>
+                <button className={styles.faqTrigger} onClick={() => setOpenFaq(openFaq === idx ? null : idx)}>
                   <span>{faq.q}</span>
                   <span className={styles.faqIcon}>+</span>
                 </button>
@@ -689,36 +540,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* App Download / CTA Section */}
-      <section id="download" className={styles.downloadSection}>
+      {/* ══════════════════════════════════════════════════════════════
+          DOWNLOAD CTA
+          ══════════════════════════════════════════════════════════════ */}
+      <section id="download" className={styles.downloadSection} ref={addRevealRef}>
         <div className={`${styles.container} ${styles.downloadContainer}`}>
           <div className={styles.downloadContent}>
-            <span
-              className={styles.badge}
-              style={{ color: "var(--accent-purple)" }}
-            >
-              Secure Your Ledger
-            </span>
-            <h2 className={styles.sectionTitle}>
-              Start Budgeting Privately Today
-            </h2>
+            <span className={styles.badge}><span className={styles.badgeDot} /> Free Download</span>
+            <h2 className={styles.sectionTitle}>Ready to take control of your money?</h2>
             <p className={styles.sectionSubtitle}>
-              Available for Android (iOS coming soon). Download now to track
-              assets, budgets, and text alerts with absolute data sovereignty.
+              Join thousands of Indians who budget smarter with EchoSpend.
+              Free download. No sign-up required. No data leaves your phone.
             </p>
             <div className={styles.downloadButtons}>
               <a
                 href="https://play.google.com/store/apps/details?id=com.adkdinesh.echospend"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.btnDownload}
-                style={{
-                  padding: "16px 36px",
-                  fontSize: "1rem",
-                  borderRadius: "40px",
-                }}
+                className={styles.btnPrimary}
+                style={{ padding: "16px 36px", fontSize: "1rem", borderRadius: 40 }}
               >
-                Download for Android
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302a1 1 0 0 1 0 1.38l-2.302 2.302L15.396 12l2.302-2.492zM5.864 3.467l10.937 6.333-2.302 2.302L5.864 3.467z" /></svg>
+                Download for Android — Free
               </a>
             </div>
           </div>
@@ -726,33 +569,13 @@ export default function Home() {
           <div className={styles.qrCardContainer}>
             <div className={styles.qrCard}>
               <div className={styles.qrCodeWrapper}>
-                <Image
-                  src="/qr-playstore.svg"
-                  alt="Scan to Download Echo Spend"
-                  width={140}
-                  height={140}
-                  className={styles.qrImage}
-                />
+                <Image src="/qr-playstore.svg" alt="Scan to Download Echo Spend" width={140} height={140} className={styles.qrImage} />
                 <div className={styles.qrLogoWrapper}>
-                  <Image
-                    src="/logos/icon.png"
-                    alt="Echo Spend Logo"
-                    width={28}
-                    height={28}
-                    className={styles.qrLogo}
-                  />
+                  <Image src="/app-screens/app_logo.png" alt="" width={28} height={28} className={styles.qrLogo} />
                 </div>
-                <div className={styles.qrScanLine}></div>
+                <div className={styles.qrScanLine} />
               </div>
               <div className={styles.qrMeta}>
-                <svg
-                  className={styles.androidIcon}
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M17.52 14.3c-.02-.53-.42-.95-.95-.95-.53 0-.93.42-.95.95v1.4c.02.53.42.95.95.95.53 0 .93-.42.95-.95v-1.4zM8.38 14.3c-.02-.53-.42-.95-.95-.95-.53 0-.93.42-.95.95v1.4c.02.53.42.95.95.95.53 0 .93-.42.95-.95v-1.4zM20.25 10.3h-2.13l1.83-3.17c.18-.32.07-.72-.25-.9-.32-.18-.72-.07-.9.25L17 9.6c-1.39-.77-3.08-1.2-4.9-1.2-1.82 0-3.51.43-4.9 1.2L5.45 6.48c-.18-.32-.58-.43-.9-.25-.32.18-.43.58-.25.9l1.83 3.17H3.95c-.41 0-.75.34-.75.75v5.18c0 .41.34.75.75.75h1.22v2.82c0 .41.34.75.75.75h1.22c.41 0 .75-.34.75-.75v-2.82h3.66v2.82c0 .41.34.75.75.75h1.22c.41 0 .75-.34.75-.75v-2.82h1.22c.41 0 .75-.34.75-.75V11.05c0-.41-.34-.75-.75-.75z" />
-                </svg>
                 <span className={styles.qrText}>Scan to Download</span>
               </div>
             </div>
@@ -760,65 +583,43 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer Section */}
+      {/* ══════════════════════════════════════════════════════════════
+          FOOTER
+          ══════════════════════════════════════════════════════════════ */}
       <footer className={styles.footer}>
         <div className={`${styles.container} ${styles.footerGrid}`}>
           <div className={styles.footerLogoDesc}>
             <Link href="#" className={styles.footerLogo}>
-              <Image
-                src="/logos/icon.png"
-                alt="Echo Spend Logo"
-                width={28}
-                height={28}
-                className={styles.logoImage}
-              />
+              <Image src="/app-screens/app_logo.png" alt="" width={28} height={28} className={styles.logoImage} />
               <span>Echo Spend</span>
             </Link>
             <p className={styles.footerDesc}>
-              A privacy-focused budgeting utility powered by local heuristics
-              and on-device Large Language Models.
+              India&apos;s most private finance app. Powered by on-device AI and your personal Google Drive.
             </p>
           </div>
 
           <div className={styles.footerCol}>
-            <h4>App Links</h4>
+            <h4>Navigation</h4>
             <ul className={styles.footerLinks}>
-              <li>
-                <a href="#features" className={styles.footerLink}>
-                  Features
-                </a>
-              </li>
-              <li>
-                <a href="#trust" className={styles.footerLink}>
-                  Architecture
-                </a>
-              </li>
-              <li>
-                <a href="#faq" className={styles.footerLink}>
-                  FAQs
-                </a>
-              </li>
+              <li><a href="#features" className={styles.footerLink}>Features</a></li>
+              <li><a href="#privacy" className={styles.footerLink}>Privacy</a></li>
+              <li><a href="#ai-advisor" className={styles.footerLink}>AI Advisor</a></li>
+              <li><a href="#faq" className={styles.footerLink}>FAQs</a></li>
             </ul>
           </div>
 
           <div className={styles.footerCol}>
-            <h4>Privacy</h4>
+            <h4>Legal</h4>
             <ul className={styles.footerLinks}>
-              <li>
-                <Link href="/privacy" className={styles.footerLink}>
-                  Privacy Policy
-                </Link>
-              </li>
+              <li><Link href="/privacy" className={styles.footerLink}>Privacy Policy</Link></li>
+              <li><a href="mailto:hello@echospend.app" className={styles.footerLink}>Contact</a></li>
+              <li><a href="https://github.com/Dineshkumargits/echo-spend" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>GitHub</a></li>
             </ul>
           </div>
         </div>
 
-        <div className={`${styles.container}  ${styles.footerBottom}`}>
-          <p>
-            &copy; 2026 Echo Spend. All rights reserved. Data belongs strictly
-            to you.
-          </p>
-          <p>Built with absolute privacy.</p>
+        <div className={`${styles.container} ${styles.footerBottom}`}>
+          <p>&copy; 2026 Echo Spend. Built with 💚 in India. Your data stays on your device. Always.</p>
         </div>
       </footer>
     </>

@@ -17,19 +17,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Echo Spend | 100% Private, On-Device Budget Tracker & AI SMS Parser",
+  title: "Echo Spend — Automate Your Budget. Keep Your Data Private.",
   description:
-    "Secure your financial privacy with Echo Spend. Track expenses, budgets, subscriptions, and EMIs offline using Echo AI. Zero ads, zero tracking, and sandboxed Google Drive sync.",
+    "India's most private finance app. On-device AI (Qwen 2.5) reads bank SMS offline, auto-categorizes spending, tracks budgets, subscriptions & split expenses — all 100% on your phone. No servers. No bank linking. Free download.",
   keywords: [
-    "personal finance app",
+    "personal finance app India",
+    "expense tracker India",
     "privacy budget tracker",
-    "local AI expense manager",
-    "offline finance",
-    "sandboxed Google Drive backup",
-    "Echo AI",
-    "SMS parse budget",
+    "SMS expense tracker",
+    "offline AI finance",
+    "HDFC SMS parser",
+    "ICICI expense tracker",
+    "SBI budget app",
+    "money manager India",
+    "local AI finance app",
+    "split expenses app",
+    "subscription tracker",
+    "on-device AI",
+    "Echo Spend",
   ],
-  authors: [{ name: "Echo Spend Developer" }],
+  authors: [{ name: "Echo Spend" }],
   alternates: {
     canonical: "https://echospend.adkdev.in",
   },
@@ -38,19 +45,28 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Echo Spend | 100% Private, On-Device Budget Tracker",
+    title: "Echo Spend — Automate Your Budget. Keep Your Data Private.",
     description:
-      "Track budgets and transaction alerts offline with Echo AI. Zero tracking, zero servers.",
+      "On-device AI reads your bank SMS offline, auto-categorizes spending. Zero cloud servers. 100% local-first. Free for Android.",
     url: "https://echospend.adkdev.in",
     siteName: "Echo Spend",
     type: "website",
-    locale: "en_US",
+    locale: "en_IN",
+    images: [
+      {
+        url: "/app-screens/01_dashboard.png",
+        width: 720,
+        height: 1560,
+        alt: "Echo Spend Dashboard showing ₹1,64,450 net worth",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Echo Spend | 100% Private Budget Tracker",
+    title: "Echo Spend — Automate Your Budget. Keep Your Data Private.",
     description:
-      "Budget tracking with offline Echo AI. Complete privacy control over your money.",
+      "On-device AI reads your bank SMS offline. Zero cloud servers. 100% private finance for India.",
+    images: ["/app-screens/01_dashboard.png"],
   },
   icons: {
     icon: "/logos/icon.png",
@@ -60,7 +76,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050508",
+  themeColor: "#0A1416",
   width: "device-width",
   initialScale: 1,
 };
@@ -73,7 +89,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${inter.variable}`}>
       <body className="dark-theme">
-        {/* Glow grids in layout to apply on all app sub-routes */}
+        {/* Decorative glow spheres (green + amber) */}
         <div className="glow-bg" aria-hidden="true">
           <div className="glow-sphere sphere-1"></div>
           <div className="glow-sphere sphere-2"></div>
